@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>แบบฝึกซ้อม PISA Interactive - ปีตีและอุณหภูมิ</title>
+    
+    <!-- ฟอนต์ Mali สไตล์การ์ตูนน่ารัก -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Mali', cursive, sans-serif;
+        }
+
+        /* พื้นหลังลายตารางสมุด */
+        body {
+            background-color: #f2ebd9;
+            background-image: 
+                linear-gradient(#e2d9c5 1.5px, transparent 1.5px),
+                linear-gradient(90deg, #e2d9c5 1.5px, transparent 1.5px);
+            background-size: 25px 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* ================= 1. หน้าเริ่มกด (Start Screen) ================= */
+        .paper-card {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            background: #ffffff;
+            border: 3px solid #222222;
+            border-radius: 12px;
+            padding: 35px 20px 25px 20px;
+            box-shadow: 8px 8px 0px #1e1e1e;
+            transform: rotate(-1deg);
+            text-align: center;
+        }
+
+        .paper-card::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(2deg);
+            width: 100px;
+            height: 28px;
+            background-color: rgba(245, 212, 92, 0.85);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .main-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #ea4335;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #000;
+            -webkit-text-stroke: 1.2px #000;
+        }
+
+        .sub-title {
+            font-size: 1.1rem;
+            color: #444;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .subject-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 3px solid #222;
+            border-radius: 10px;
+            box-shadow: 4px 4px 0px #222;
+            background-color: #b5e7d3;
+        }
+
+        .subject-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #222;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-start {
+            background-color: #ffffff;
+            color: #222;
+            border: 2px solid #222;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #222;
+        }
+
+        /* ================= 2. เครื่องเล่นวิดีโอ (แก้ไขโจทย์ล้น) ================= */
+        .player-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #222;
+            box-shadow: 8px 8px 0px #1e1e1e;
+        }
+
+        video {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: block;
+            background-color: #000;
+        }
+
+        /* Overlay แสดงตัวเลือก */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.93);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* จัดให้อยู่จากด้านบนลงมา */
+            align-items: center;
+            padding: 15px 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+            overflow-y: auto; /* อนุญาตให้เลื่อนขึ้นลงได้หากจอเล็กมาก */
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .question-box {
+            text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .question-box h2 {
+            color: #ffca28;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            line-height: 1.35;
+        }
+
+        .question-box p {
+            color: #ddd;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        /* ตารางปุ่มตัวเลือก */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .btn-choice {
+            padding: 10px 12px;
+            font-size: 0.88rem;
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .btn-choice:active {
+            background: #e50914;
+        }
+
+        /* ================= 3. กล่องเฉลย ================= */
+        .explanation-card {
+            position: absolute;
+            bottom: 12px;
+            left: 3%;
+            width: 94%;
+            background: rgba(15, 15, 15, 0.95);
+            border-left: 5px solid #2196F3;
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+        }
+
+        .explanation-card.correct { border-left-color: #4CAF50; }
+        .explanation-card.wrong { border-left-color: #ff5252; }
+
+        .explanation-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .explanation-card.correct h3 { color: #4CAF50 !important; }
+        .explanation-card.wrong h3 { color: #ff5252 !important; }
+
+        .explanation-card p {
+            color: #ffffff !important;
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
+        .btn-replay {
+            margin-top: 8px;
+            padding: 6px 14px;
+            background: #2196F3;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: bold;
+        }
+
+        /* ================= 4. Responsive สำหรับจอมือถือ ================= */
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 4px;
+            }
+
+            .overlay {
+                padding: 10px 8px;
+            }
+
+            .question-box h2 {
+                font-size: 0.85rem; /* ย่อโจทย์ให้พอดีจอแนวตั้ง */
+            }
+
+            .question-box p {
+                font-size: 0.72rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr; /* เปลี่ยนเป็นแถวเดียวเรียงลงมา */
+                gap: 5px;
+            }
+
+            .btn-choice {
+                padding: 7px 10px;
+                font-size: 0.78rem;
+            }
+
+            .explanation-card {
+                bottom: 6px;
+                padding: 10px;
+            }
+
+            .explanation-card h3 {
+                font-size: 0.85rem;
+            }
+
+            .explanation-card p {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. หน้าแรก (กระดาษโน้ต) -->
+    <div id="startScreen" class="paper-card">
+        <h1 class="main-title">PISA</h1>
+        <div class="sub-title">
+            <span>✏️</span> เลือกข้อที่ต้องการฝึกซ้อม
+        </div>
+
+        <div class="subject-list">
+            <div class="subject-item">
+                <div class="subject-title">
+                    <span>☕</span> ข้อที่ 1 ปีตีและอุณหภูมิ
+                </div>
+                <button class="btn-start" onclick="startQuestion('intro.mp4')">START</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. เครื่องเล่นวิดีโอ -->
+    <div id="playerContainer" class="player-container">
+        <video id="videoPlayer" controls playsinline>
+            <source id="videoSource" src="intro.mp4" type="video/mp4">
+            เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
+        </video>
+
+        <!-- Overlay ตัวเลือก -->
+        <div id="quizOverlay" class="overlay">
+            <div class="question-box">
+                <h2>คำถาม: ผ่านไป 10 นาที อุณหภูมิของกาแฟและน้ำแร่น่าจะเป็นเท่าใด?</h2>
+                <p>วางถ้วยไว้ในห้องอุณหภูมิ 20°C (กาแฟเริ่มต้น 90°C / น้ำแร่เริ่มต้น 5°C)</p>
+            </div>
+            <div class="options-grid">
+                <button class="btn-choice" onclick="selectChoice('A')">ก) 70°C และ 10°C</button>
+                <button class="btn-choice" onclick="selectChoice('B')">ข) 90°C และ 5°C</button>
+                <button class="btn-choice" onclick="selectChoice('C')">ค) 70°C และ 25°C</button>
+                <button class="btn-choice" onclick="selectChoice('D')">ง) 20°C และ 20°C</button>
+            </div>
+        </div>
+
+        <!-- กล่องเฉลย -->
+        <div id="explanationCard" class="explanation-card">
+            <h3 id="expTitle"></h3>
+            <p id="expText"></p>
+            <button id="retryBtn" class="btn-replay" onclick="resetToIntro()">ลองใหม่อีกครั้ง</button>
+        </div>
+    </div>
+
+<script>
+    const startScreen = document.getElementById('startScreen');
+    const playerContainer = document.getElementById('playerContainer');
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+    const quizOverlay = document.getElementById('quizOverlay');
+    const expCard = document.getElementById('explanationCard');
+    const expTitle = document.getElementById('expTitle');
+    const expText = document.getElementById('expText');
+    const retryBtn = document.getElementById('retryBtn');
+
+    let isIntroFinished = false;
+    let currentChoice = '';
+
+    function startQuestion(videoFile) {
+        startScreen.style.display = 'none';
+        playerContainer.style.display = 'block';
+        
+        videoSource.src = videoFile;
+        videoPlayer.load();
+        videoPlayer.play();
+    }
+
+    videoPlayer.addEventListener('ended', function() {
+        if (!isIntroFinished) {
+            quizOverlay.classList.add('active');
+            isIntroFinished = true;
+        } else {
+            showExplanation();
+        }
+    });
+
+    function selectChoice(choice) {
+        currentChoice = choice;
+        quizOverlay.classList.remove('active');
+        
+        if (choice === 'A') playNewVideo('ending_A.mp4');
+        else if (choice === 'B') playNewVideo('ending_B.mp4');
+        else if (choice === 'C') playNewVideo('ending_C.mp4');
+        else if (choice === 'D') playNewVideo('ending_D.mp4');
+    }
+
+    function playNewVideo(videoFileName) {
+        videoSource.src = videoFileName;
+        videoPlayer.load();
+        videoPlayer.play();
+    }
+
+    function showExplanation() {
+        expCard.style.display = 'block';
+
+        if (currentChoice === 'A') {
+            expCard.className = 'explanation-card correct';
+            expTitle.innerText = '✅ ถูกต้อง! (ตอบข้อ ก)';
+            expText.innerText = 'เนื่องจากความร้อนถ่ายโอนจากอุณหภูมิสูงไปต่ำ กาแฟจึงเย็นลง และน้ำแร่จะอุ่นขึ้น แต่เวลา 10 นาทียังไม่เพียงพอที่จะปรับจนเท่ากับอุณหภูมิห้อง (20°C)';
+            retryBtn.style.display = 'none';
+        } else {
+            expCard.className = 'explanation-card wrong';
+            expTitle.innerText = '❌ ยังไม่ถูกต้อง';
+            
+            if (currentChoice === 'B') {
+                expText.innerText = 'ผ่านไป 10 นาที อุณหภูมิย่อมมีการเปลี่ยนแปลง ไม่สามารถเท่าเดิมได้ครับ';
+            } else if (currentChoice === 'C') {
+                expText.innerText = 'น้ำแร่ไม่สามารถรับความร้อนจนอุณหภูมิสูงกว่าห้อง (20°C) ได้เองตามธรรมชาติครับ';
+            } else if (currentChoice === 'D') {
+                expText.innerText = 'การจะปรับอุณหภูมิให้เท่ากับห้องพอดี (สมดุลความร้อน) ต้องใช้เวลานานกว่า 10 นาทีครับ';
+            }
+            
+            retryBtn.style.display = 'inline-block';
+        }
+    }
+
+    function resetToIntro() {
+        expCard.style.display = 'none';
+        isIntroFinished = false;
+        playNewVideo('intro.mp4');
+    }
+</script>
+
+</body>
+</html>

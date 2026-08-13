@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PISA Practice - เลือกวิชา</title>
+    <!-- นำเข้าฟอนต์ลายมือภาษาไทยน่ารักๆ และฟอนต์ภาษาอังกฤษแนวลายมือ -->
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Mali:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /* พื้นหลังกระดาษสมุดแบบมีเส้นตาราง (Grid Paper) */
+            background-color: #f4efe6;
+            background-image: 
+                linear-gradient(#e2dad0 1px, transparent 1px),
+                linear-gradient(90deg, #e2dad0 1px, transparent 1px);
+            background-size: 24px 24px;
+            font-family: 'Mali', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* การ์ดแผ่นกระดาษตรงกลาง */
+        .paper-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 28px;
+            /* ทำให้กรอบดูเหมือนตัดด้วยมือ เบี้ยวแบบธรรมชาติ */
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            border: 3.5px solid #222222;
+            box-shadow: 8px 8px 0px #222222;
+            position: relative;
+            transform: rotate(-1deg); /* เอียงการ์ดเล็กน้อย */
+        }
+
+        /* เทปกาวปิดมุมกระดาษ (เพิ่มความ Handmade) */
+        .tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 110px;
+            height: 28px;
+            background-color: rgba(243, 198, 35, 0.6);
+            border: 1px dashed rgba(0,0,0,0.15);
+        }
+
+        /* หัวข้อ */
+        .header-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 48px;
+            color: #ff5252;
+            text-shadow: 3px 3px 0px #222222;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .header-title p {
+            font-size: 16px;
+            color: #555;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        /* รายการปุ่มกด */
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* สไตล์ปุ่มกดกระดาษโน้ต */
+        .btn-paper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            padding: 16px 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #222222;
+            border: 3px solid #222222;
+            box-shadow: 5px 5px 0px #222222;
+            transition: all 0.15s ease-in-out;
+            position: relative;
+        }
+
+        /* ปุ่มที่ 1: วิทยาศาสตร์ (สีเขียวมิ้นต์ เบี้ยวซ้าย) */
+        .btn-science {
+            background-color: #a8e6cf;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            transform: rotate(1deg);
+        }
+
+        /* ปุ่มที่ 2: คณิตศาสตร์ (สีฟ้าพาสเทล เบี้ยวขวา) */
+        .btn-math {
+            background-color: #aed9e0;
+            border-radius: 15px 225px 15px 255px/255px 15px 225px 15px;
+            transform: rotate(-1.5deg);
+        }
+
+        /* ปุ่มที่ 3: การอ่าน (สีส้มพีช เบี้ยวซ้าย) */
+        .btn-reading {
+            background-color: #ffd3b6;
+            border-radius: 225px 15px 255px 15px/15px 255px 15px 225px;
+            transform: rotate(0.8deg);
+        }
+
+        /* เอฟเฟกต์ตอนขยับเมาส์มาโดน */
+        .btn-paper:hover {
+            transform: scale(1.03) rotate(0deg);
+            box-shadow: 7px 7px 0px #222222;
+        }
+
+        /* เอฟเฟกต์ตอนกดปุ่ม (กดแล้วจมลงไป) */
+        .btn-paper:active {
+            transform: translate(3px, 3px) rotate(0deg);
+            box-shadow: 2px 2px 0px #222222;
+        }
+
+        .badge {
+            font-size: 14px;
+            background: #ffffff;
+            border: 2px solid #222222;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="paper-card">
+        <div class="tape"></div>
+        
+        <div class="header-title">
+            <h1>PISA</h1>
+            <p>✏️ เลือกวิชาที่ต้องการฝึกซ้อม</p>
+        </div>
+
+        <div class="menu-list">
+            <a href="science.html" class="btn-paper btn-science">
+                <span>🧪 วิทยาศาสตร์</span>
+                <span class="badge">START</span>
+            </a>
+            
+            <a href="math.html" class="btn-paper btn-math">
+                <span>📐 คณิตศาสตร์</span>
+                <span class="badge">START</span>
+            </a>
+            
+            <a href="read.html" class="btn-paper btn-reading">
+                <span>📖 การอ่าน</span>
+                <span class="badge">START</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
